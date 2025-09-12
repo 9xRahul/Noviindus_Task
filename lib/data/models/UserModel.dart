@@ -9,7 +9,8 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json, {String? getUsername}) {
     String token = '';
-    
+
+    print(json);
     //assumption values since api is giving error
     if (json.containsKey('token'))
       token = json['token'].toString();

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:noviindus_task/core/size_config.dart';
 import 'package:noviindus_task/core/storage_helper.dart';
 import 'package:noviindus_task/data/data_sources/auth_remote_data_sourse.dart';
+import 'package:noviindus_task/data/data_sources/patient_remote_data_sourse.dart';
+import 'package:noviindus_task/data/repositories/patient_repository_impl.dart';
+import 'package:noviindus_task/domain/usecases/patient_usecase.dart';
 import 'package:noviindus_task/presentation/providers/auth_provider.dart';
-import 'package:noviindus_task/presentation/ui/home_screen.dart';
+import 'package:noviindus_task/presentation/providers/patient_provider.dart';
+import 'package:noviindus_task/presentation/ui/home_screen/home_screen.dart';
 import 'package:noviindus_task/presentation/ui/login_screen/login_screen.dart';
 import 'package:noviindus_task/presentation/ui/splashscreen.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +27,10 @@ void main() {
   final authRepo = AuthRepositoryImpl(authRemote, storageHelper);
   final loginUsecase = LoginUsecase(authRepo);
 
+  final patientRemote = PatientRemoteDataSourceImpl(apiClient);
+  final patientRepo = PatientRepositoryImpl(patientRemote);
+  final getPatientsUsecase = GetPatientsUsecase(patientRepo);
+
   runApp(
     MultiProvider(
       providers: [
@@ -31,6 +39,9 @@ void main() {
             loginUsecase: loginUsecase,
             authRepository: authRepo,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PatientProvider(getPatients: getPatientsUsecase),
         ),
       ],
       child: const MyApp(),
@@ -50,8 +61,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
- 
- 
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _authProvider = context.read<AuthProvider>();
       _authProvider.tryAutoLogin();
@@ -61,6 +71,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'test-task',
       theme: ThemeData(primarySwatch: Colors.teal),
       home: Consumer<AuthProvider>(

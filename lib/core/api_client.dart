@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:noviindus_task/core/urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ApiClient {
   final String baseUrl;
   ApiClient({this.baseUrl = BASE_URL});
@@ -21,15 +20,16 @@ class ApiClient {
     return http.get(uri, headers: headers);
   }
 
-
   Future<http.Response> postForm(
     String path,
     Map<String, String> fields,
   ) async {
     final uri = Uri.parse('$baseUrl$path');
-    final req = http.MultipartRequest('POST', uri);
-    req.fields.addAll(fields);
-    final streamed = await req.send();
-    return http.Response.fromStream(streamed);
+
+ 
+    final response = await http.post(uri, body: fields);
+
+    return response;
   }
+  
 }
