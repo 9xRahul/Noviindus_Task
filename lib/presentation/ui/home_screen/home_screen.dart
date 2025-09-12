@@ -4,6 +4,7 @@ import 'package:noviindus_task/core/size_config.dart';
 import 'package:noviindus_task/presentation/ui/home_screen/widgets/patient_card.dart';
 import 'package:noviindus_task/presentation/ui/home_screen/widgets/sort_widget.dart';
 import 'package:noviindus_task/presentation/ui/home_screen/widgets/top_search.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/register_patient_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:noviindus_task/presentation/providers/patient_provider.dart';
 
@@ -116,7 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => RegisterPatientScreen(),
+                ),
+              );
+            },
             child: Text(
               'Register Now',
               style: TextStyle(fontSize: 16, color: ColorConfig.textWhite),

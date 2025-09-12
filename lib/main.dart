@@ -6,7 +6,10 @@ import 'package:noviindus_task/data/data_sources/patient_remote_data_sourse.dart
 import 'package:noviindus_task/data/repositories/patient_repository_impl.dart';
 import 'package:noviindus_task/domain/usecases/patient_usecase.dart';
 import 'package:noviindus_task/presentation/providers/auth_provider.dart';
+import 'package:noviindus_task/presentation/providers/branch_provider.dart';
 import 'package:noviindus_task/presentation/providers/patient_provider.dart';
+import 'package:noviindus_task/presentation/providers/register_provider.dart';
+import 'package:noviindus_task/presentation/providers/treatment_provider.dart';
 import 'package:noviindus_task/presentation/ui/home_screen/home_screen.dart';
 import 'package:noviindus_task/presentation/ui/login_screen/login_screen.dart';
 import 'package:noviindus_task/presentation/ui/splashscreen.dart';
@@ -43,6 +46,9 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => PatientProvider(getPatients: getPatientsUsecase),
         ),
+        ChangeNotifierProvider(create: (_) => TreatmentProvider(apiClient)),
+        ChangeNotifierProvider(create: (_) => BranchProvider(apiClient)),
+        ChangeNotifierProvider(create: (_) => RegisterProvider(apiClient)),
       ],
       child: const MyApp(),
     ),
