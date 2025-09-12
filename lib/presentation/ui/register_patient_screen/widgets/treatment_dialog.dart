@@ -1,6 +1,8 @@
 // lib/widgets/treatment_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:noviindus_task/core/color_config.dart';
 import 'package:noviindus_task/data/models/TreatmentModel.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/scafold_messenger.dart';
 
 /// Result returned from the dialog
 class TreatmentDialogResult {
@@ -345,17 +347,25 @@ class _TreatmentDialogContentState extends State<TreatmentDialogContent> {
                     );
                     return;
                   }
-                  Navigator.of(context).pop(
-                    TreatmentDialogResult(
-                      treatment: selectedTreatment!,
-                      maleCount: male,
-                      femaleCount: female,
-                    ),
-                  );
+                  if (male == 0 && female == 0) {
+                    showScoldSnackBar(context, "Please add atlest one person");
+                  } else {
+                    Navigator.of(context).pop(
+                      TreatmentDialogResult(
+                        treatment: selectedTreatment!,
+                        maleCount: male,
+                        femaleCount: female,
+                      ),
+                    );
+                  }
                 },
-                child: const Text(
+                child: Text(
                   'Save',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ColorConfig.textWhite,
+                  ),
                 ),
               ),
             ),
