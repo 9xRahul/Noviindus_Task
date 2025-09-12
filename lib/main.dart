@@ -8,6 +8,7 @@ import 'package:noviindus_task/domain/usecases/patient_usecase.dart';
 import 'package:noviindus_task/presentation/providers/auth_provider.dart';
 import 'package:noviindus_task/presentation/providers/branch_provider.dart';
 import 'package:noviindus_task/presentation/providers/patient_provider.dart';
+import 'package:noviindus_task/presentation/providers/payment_provider.dart';
 import 'package:noviindus_task/presentation/providers/register_provider.dart';
 import 'package:noviindus_task/presentation/providers/treatment_provider.dart';
 import 'package:noviindus_task/presentation/ui/home_screen/home_screen.dart';
@@ -49,6 +50,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => TreatmentProvider(apiClient)),
         ChangeNotifierProvider(create: (_) => BranchProvider(apiClient)),
         ChangeNotifierProvider(create: (_) => RegisterProvider(apiClient)),
+        ChangeNotifierProvider(create: (_) => PaymentOptionProvider()),
       ],
       child: const MyApp(),
     ),

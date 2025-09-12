@@ -1,10 +1,16 @@
-// lib/screens/register_patient_screen.dart
 import 'package:flutter/material.dart';
+import 'package:noviindus_task/core/color_config.dart';
+import 'package:noviindus_task/core/size_config.dart';
 import 'package:noviindus_task/data/models/treatment_counts.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/drop_down_field.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/payment_option_widget.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/text_form_field.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/time_selecter.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/treatment_dialog.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/treatment_widget.dart';
 
 import 'package:provider/provider.dart';
-import 'package:noviindus_task/core/utils/date_convert.dart'; // keep if you have format helper
+import 'package:noviindus_task/core/utils/date_convert.dart';
 
 import 'package:noviindus_task/domain/entities/branch.dart';
 import 'package:noviindus_task/presentation/providers/treatment_provider.dart';
@@ -22,7 +28,6 @@ class RegisterPatientScreen extends StatefulWidget {
 class RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  // Controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController executiveController = TextEditingController();
   final TextEditingController paymentController = TextEditingController(
@@ -31,6 +36,7 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController totalController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
   final TextEditingController discountController = TextEditingController(
     text: '0',
   );
@@ -38,14 +44,11 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
     text: '0',
   );
 
-  // static locations
   final List<String> locations = ['Center A', 'Center B', 'Center C'];
   String? selectedLocation;
 
-  // branch selection
   Branch? selectedBranch;
 
-  // selected treatments store: key = treatment id
   final Map<int, TreatmentCounts> selectedTreatments = {};
 
   bool initialLoaded = false;
@@ -108,7 +111,6 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
     );
     if (result != null) {
       setState(() {
-        // replace previous selection of same treatment id (user updated)
         selectedTreatments[result.treatment.id] = TreatmentCounts(
           treatment: result.treatment,
           male: result.maleCount,
@@ -192,174 +194,241 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
 
     if (branches.isNotEmpty) syncSelectedBranchInstance(branches);
 
+    final Color background = Theme.of(context).scaffoldBackgroundColor;
+    final Color cardColor = Colors.white;
+    final BorderRadius cardRadius = BorderRadius.circular(16);
+    final BoxShadow cardShadow = BoxShadow(
+      color: Colors.black.withOpacity(0.06),
+      blurRadius: 18,
+      offset: const Offset(0, 8),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Register Patient')),
-      body: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Form(
-          key: formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: executiveController,
-                decoration: const InputDecoration(labelText: 'Executive'),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: paymentController,
-                decoration: const InputDecoration(labelText: 'Payment'),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: addressController,
-                decoration: const InputDecoration(labelText: 'Address'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 14),
-
-              // static location
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Location (static)',
-                ),
-                value: selectedLocation,
-                hint: const Text('Choose preferred location'),
-                items: locations
-                    .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                    .toList(),
-                onChanged: (v) => setState(() => selectedLocation = v),
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Select a location' : null,
-              ),
-              const SizedBox(height: 14),
-
-              // branch dropdown
-              if (bProv.loading)
-                const Center(child: CircularProgressIndicator())
-              else
-                DropdownButtonFormField<Branch>(
-                  decoration: const InputDecoration(labelText: 'Branch'),
-                  value: selectedBranch,
-                  hint: const Text('Select branch'),
-                  items: branches
-                      .map(
-                        (b) => DropdownMenuItem(value: b, child: Text(b.name)),
-                      )
-                      .toList(),
-                  onChanged: (b) => setState(() => selectedBranch = b),
-                  validator: (v) => v == null ? 'Select branch' : null,
-                ),
-              if (bProv.error != null) ...[
-                const SizedBox(height: 6),
-                Text(
-                  'Branch load error: ${bProv.error}',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ],
-              const SizedBox(height: 16),
-
-              // add treatment button
-              Row(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: SizeConfig.screenHeight / 12),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: openTreatmentDialog,
-                      icon: const Icon(Icons.medical_services_outlined),
-                      label: const Text('Add Treatment'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: ColorConfig.iconColor,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Icon(
+                    Icons.notifications_none_outlined,
+                    color: ColorConfig.iconColor,
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+            ),
 
-              // chips list
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: selectedTreatments.entries.map((e) {
-                  final tc = e.value;
-                  return Chip(
-                    label: Text(
-                      '${tc.treatment.name} (M:${tc.male} F:${tc.female})',
-                    ),
-                    onDeleted: () =>
-                        setState(() => selectedTreatments.remove(e.key)),
-                  );
-                }).toList(),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                "Register",
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+            ),
 
-              // financials
-              TextFormField(
-                controller: totalController,
-                decoration: const InputDecoration(labelText: 'Total Amount'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: discountController,
-                decoration: const InputDecoration(labelText: 'Discount Amount'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: advanceController,
-                decoration: const InputDecoration(labelText: 'Advance Amount'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 12),
+            const Divider(height: 1),
 
-              Row(
-                children: [
-                  const Text(
-                    'Balance: ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(computeBalance()),
-                ],
-              ),
-              const SizedBox(height: 18),
-
-              regProv.status == SubmitStatus.submitting
-                  ? const Center(child: CircularProgressIndicator())
-                  : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: submit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+            SizedBox(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      children: [
+                        RoundedTextField(
+                          controller: nameController,
+                          label: 'Name',
+                          hint: 'Enter Your full name',
+                          keyboardType: TextInputType.text,
                         ),
-                        child: const Text('Submit & Generate PDF'),
-                      ),
-                    ),
 
-              if (regProv.status == SubmitStatus.failure &&
-                  regProv.error != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Error: ${regProv.error}',
-                  style: const TextStyle(color: Colors.red),
+                        const SizedBox(height: 10),
+
+                        RoundedTextField(
+                          controller: executiveController,
+                          label: 'Whatsapp Number',
+                          hint: 'Enter you whatsapp number',
+                          keyboardType: TextInputType.number,
+                        ),
+
+                        const SizedBox(height: 10),
+                        RoundedTextField(
+                          controller: addressController,
+                          label: 'Address',
+                          hint: 'Enter Your address',
+                          keyboardType: TextInputType.text,
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        RoundedDropdownField<String>(
+                          label: 'Location ',
+                          hint: 'Choose preferred location',
+                          value: selectedLocation,
+                          items: locations
+                              .map(
+                                (l) =>
+                                    DropdownMenuItem(value: l, child: Text(l)),
+                              )
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => selectedLocation = v),
+                          validator: (v) => v == null || v.isEmpty
+                              ? 'Select a location'
+                              : null,
+                        ),
+                        const SizedBox(height: 14),
+
+                        RoundedDropdownField<Branch>(
+                          label: 'Branch',
+                          hint: 'Select branch',
+                          value: selectedBranch,
+                          items: branches.map((b) {
+                            return DropdownMenuItem<Branch>(
+                              value: b,
+                              child: Text(b.name),
+                            );
+                          }).toList(),
+                          onChanged: (Branch? b) =>
+                              setState(() => selectedBranch = b),
+                          validator: (Branch? v) =>
+                              v == null ? 'Select branch' : null,
+                        ),
+                        const SizedBox(height: 16),
+
+                        TreatmentListWidget(
+                          selectedTreatments: selectedTreatments,
+                          onAdd: () => openTreatmentDialog(),
+                          onEdit: (treatmentId) async {
+                            final tProv = context.read<TreatmentProvider>();
+                            final result = await showTreatmentDialog(
+                              context: context,
+                              treatments: tProv.treatments,
+                              initialTreatmentId: treatmentId,
+                              initialMale:
+                                  selectedTreatments[treatmentId]?.male ?? 0,
+                              initialFemale:
+                                  selectedTreatments[treatmentId]?.female ?? 0,
+                            );
+                            if (result != null) {
+                              setState(() {
+                                selectedTreatments[result.treatment.id] =
+                                    TreatmentCounts(
+                                      treatment: result.treatment,
+                                      male: result.maleCount,
+                                      female: result.femaleCount,
+                                    );
+                              });
+                            }
+                          },
+                          onRemove: (id) =>
+                              setState(() => selectedTreatments.remove(id)),
+                        ),
+
+                        const SizedBox(height: 16),
+                        const PaymentOptionWidget(),
+                        const SizedBox(height: 16),
+                        RoundedTextField(
+                          controller: addressController,
+                          label: 'Advance Amount',
+                          hint: '',
+                          keyboardType: TextInputType.number,
+                        ),
+
+                        const SizedBox(height: 16),
+                        RoundedTextField(
+                          controller: addressController,
+                          label: 'Balance Amount',
+                          hint: '',
+                          keyboardType: TextInputType.number,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        RoundedTextField(
+                          controller: dateController,
+                          label: 'Appointment Date',
+                          hint: '',
+                          isDate: true,
+                          validator: (v) => v == null || v.isEmpty
+                              ? 'Please pick a date'
+                              : null,
+                        ),
+
+                        const SizedBox(height: 18),
+                        TreatmentTimePicker(
+                          onChanged: (hour, minute) {
+                            print('Selected: $hour:$minute');
+                          },
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        regProv.status == SubmitStatus.submitting
+                            ? const Center(child: CircularProgressIndicator())
+                            : Container(
+                                padding: const EdgeInsets.all(12),
+                                color: Colors.white,
+                                child: SizedBox(
+                                  height: 52,
+                                  width: SizeConfig.screenWidth,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green[800],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              RegisterPatientScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      'Register Now',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: ColorConfig.textWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                        if (regProv.status == SubmitStatus.failure &&
+                            regProv.error != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            'Error: ${regProv.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
