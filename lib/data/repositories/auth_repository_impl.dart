@@ -17,8 +17,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String username,
     required String password,
   }) async {
+    print(username);
+    print(password);
     final json = await remote.login(username, password);
-
 
     final userModel = UserModel.fromJson(json, getUsername: username);
 
@@ -26,9 +27,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Token not found in login response');
     }
 
-
-    await storage.saveToken(userModel.token);
-
+    await storage.saveToken(userModel.token, userModel.username);
 
     return userModel.toEntity();
   }

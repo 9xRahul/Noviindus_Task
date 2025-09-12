@@ -31,8 +31,8 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login(String username, String password) async {
     status = AuthStatus.loading;
     errorMessage = null;
-    
-    // notifyListeners();
+
+    //notifyListeners();
 
     try {
       final u = await loginUsecase.call(username, password);
