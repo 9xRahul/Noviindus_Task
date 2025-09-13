@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
           switch (auth.status) {
             case AuthStatus.loading:
             case AuthStatus.unknown:
-              return const Scaffold(body: SplashScreen());
+              return SplashScreen();
             case AuthStatus.authenticated:
               return const HomeScreen();
             case AuthStatus.unauthenticated:
