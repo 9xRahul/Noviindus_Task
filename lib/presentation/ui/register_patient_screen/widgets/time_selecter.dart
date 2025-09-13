@@ -29,7 +29,7 @@ class _TreatmentTimePickerState extends State<TreatmentTimePicker> {
         const SizedBox(height: 6),
         Row(
           children: [
-            // Hour dropdown
+            
             Expanded(
               child: Container(
                 height: 50,
@@ -67,7 +67,7 @@ class _TreatmentTimePickerState extends State<TreatmentTimePicker> {
               ),
             ),
             const SizedBox(width: 12),
-            // Minute dropdown
+            
             Expanded(
               child: Container(
                 height: 50,

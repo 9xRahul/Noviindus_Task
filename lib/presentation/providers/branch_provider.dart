@@ -1,4 +1,4 @@
-// lib/presentation/providers/branch_provider.dart
+
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:noviindus_task/core/api_client.dart';
@@ -14,7 +14,7 @@ class BranchProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
-  /// Expose domain entities to UI
+  
   List<Branch> get branches => _models.map((m) => m.toEntity()).toList();
 
   Future<void> loadBranches() async {
@@ -44,11 +44,11 @@ class BranchProvider extends ChangeNotifier {
               tmp.add(BranchModel.fromJson(Map<String, dynamic>.from(item)));
           }
         } else if (decoded is Map && decoded.containsKey('id')) {
-          // single object response
+          
           tmp.add(BranchModel.fromJson(Map<String, dynamic>.from(decoded)));
         }
 
-        // Deduplicate by id (keep first occurrence)
+        
         final Map<int, BranchModel> unique = {};
         for (final m in tmp) {
           if (!unique.containsKey(m.id)) unique[m.id] = m;

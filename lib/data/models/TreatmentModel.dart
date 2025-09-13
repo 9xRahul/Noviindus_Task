@@ -1,4 +1,4 @@
-// lib/models/treatment_model.dart
+
 class Treatment {
   final int id;
   final String name;

@@ -1,4 +1,3 @@
-// lib/data/models/user_model.dart
 import 'package:noviindus_task/domain/entities/user.dart';
 
 class UserModel {

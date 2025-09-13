@@ -1,4 +1,4 @@
-// lib/data/models/branch_model.dart
+
 import 'package:noviindus_task/domain/entities/branch.dart';
 
 class BranchModel {

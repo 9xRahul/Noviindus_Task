@@ -1,4 +1,4 @@
-// lib/domain/entities/branch.dart
+
 class Branch {
   final int id;
   final String name;

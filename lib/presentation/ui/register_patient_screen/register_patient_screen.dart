@@ -1,9 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:noviindus_task/core/color_config.dart';
+import 'package:noviindus_task/core/pdf/pdf_generator.dart';
 import 'package:noviindus_task/core/size_config.dart';
 import 'package:noviindus_task/data/models/treatment_counts.dart';
+import 'package:noviindus_task/presentation/ui/pdf_preview_screen/pdf_preview_screen.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/drop_down_field.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/payment_option_widget.dart';
+import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/send_data_to_generate_pdf.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/text_form_field.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/time_selecter.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/treatment_dialog.dart';
@@ -44,6 +49,10 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
     text: '0',
   );
 
+  final TextEditingController balanceController = TextEditingController();
+
+  String treatmentHour = "0";
+  String treatmentMin = "0";
   final List<String> locations = ['Center A', 'Center B', 'Center C'];
   String? selectedLocation;
 
@@ -166,6 +175,9 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
       'female': femaleIds.join(','),
       'branch': selectedBranch?.id.toString() ?? '',
       'treatments': treatmentIds,
+      'treatmentdate': dateController.toString(),
+      "hour": treatmentHour,
+      "min": treatmentMin,
     };
 
     final ok = await regProv.submit(fields);
@@ -261,7 +273,7 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
                         const SizedBox(height: 10),
 
                         RoundedTextField(
-                          controller: executiveController,
+                          controller: phoneController,
                           label: 'Whatsapp Number',
                           hint: 'Enter you whatsapp number',
                           keyboardType: TextInputType.number,
@@ -341,11 +353,25 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
                               setState(() => selectedTreatments.remove(id)),
                         ),
 
+                        RoundedTextField(
+                          controller: totalController,
+                          label: 'Total Amount',
+                          hint: '',
+                          keyboardType: TextInputType.number,
+                        ),
                         const SizedBox(height: 16),
+                        RoundedTextField(
+                          controller: discountController,
+                          label: 'discount Amount',
+                          hint: '',
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: 16),
+
                         const PaymentOptionWidget(),
                         const SizedBox(height: 16),
                         RoundedTextField(
-                          controller: addressController,
+                          controller: advanceController,
                           label: 'Advance Amount',
                           hint: '',
                           keyboardType: TextInputType.number,
@@ -353,7 +379,7 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
 
                         const SizedBox(height: 16),
                         RoundedTextField(
-                          controller: addressController,
+                          controller: balanceController,
                           label: 'Balance Amount',
                           hint: '',
                           keyboardType: TextInputType.number,
@@ -374,7 +400,8 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
                         const SizedBox(height: 18),
                         TreatmentTimePicker(
                           onChanged: (hour, minute) {
-                            print('Selected: $hour:$minute');
+                            treatmentHour = hour.toString();
+                            treatmentMin = minute.toString();
                           },
                         ),
 
@@ -395,13 +422,31 @@ class RegisterPatientScreenState extends State<RegisterPatientScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              RegisterPatientScreen(),
-                                        ),
+                                    onPressed: () async {
+                                      final success = await handleRegisterSave(
+                                        context: context,
+                                        formKey: formKey,
+                                        nameController: nameController,
+                                        executiveController:
+                                            executiveController,
+                                        paymentController: paymentController,
+                                        phoneController: phoneController,
+                                        addressController: addressController,
+                                        totalController: totalController,
+                                        dateController: dateController,
+                                        balanceController: balanceController,
+                                        discountController: discountController,
+                                        advanceController: advanceController,
+                                        selectedTreatments: selectedTreatments,
+                                        selectedBranch: selectedBranch,
+                                        selectedLocation: selectedLocation,
+
+                                        treatmentHour: treatmentHour,
+                                        treatmentMin: treatmentMin,
+                                        suggestedFileNamePrefix: 'invoice',
                                       );
+
+                                      if (success) {}
                                     },
                                     child: Text(
                                       'Register Now',

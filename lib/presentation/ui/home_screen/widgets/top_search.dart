@@ -44,7 +44,7 @@ class SearchBarWithButton extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorConfig.primaryGreen, // Dark green
+                backgroundColor: ColorConfig.primaryGreen, 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

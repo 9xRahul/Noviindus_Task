@@ -1,10 +1,10 @@
-// lib/widgets/treatment_dialog.dart
+
 import 'package:flutter/material.dart';
 import 'package:noviindus_task/core/color_config.dart';
 import 'package:noviindus_task/data/models/TreatmentModel.dart';
 import 'package:noviindus_task/presentation/ui/register_patient_screen/widgets/scafold_messenger.dart';
 
-/// Result returned from the dialog
+
 class TreatmentDialogResult {
   final Treatment treatment;
   final int maleCount;
@@ -17,8 +17,8 @@ class TreatmentDialogResult {
   });
 }
 
-/// Show a dialog to pick a single Treatment and set male/female counts.
-/// Accepts your app's Treatment model (lib/data/models/TreatmentModel.dart).
+
+
 Future<TreatmentDialogResult?> showTreatmentDialog({
   required BuildContext context,
   required List<Treatment> treatments,
@@ -183,7 +183,7 @@ class _TreatmentDialogContentState extends State<TreatmentDialogContent> {
             ),
             const SizedBox(height: 12),
 
-            // Male row
+            
             Row(
               children: [
                 Container(
@@ -255,7 +255,7 @@ class _TreatmentDialogContentState extends State<TreatmentDialogContent> {
             ),
             const SizedBox(height: 12),
 
-            // Female row
+            
             Row(
               children: [
                 Container(
