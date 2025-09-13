@@ -1,39 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:noviindus_task/core/size_config.dart';
-import 'package:noviindus_task/core/storage_helper.dart';
-import 'package:noviindus_task/data/data_sources/auth_remote_data_sourse.dart';
-import 'package:noviindus_task/data/data_sources/patient_remote_data_sourse.dart';
-import 'package:noviindus_task/data/repositories/patient_repository_impl.dart';
-import 'package:noviindus_task/domain/usecases/patient_usecase.dart';
-import 'package:noviindus_task/presentation/providers/auth_provider.dart';
-import 'package:noviindus_task/presentation/providers/branch_provider.dart';
-import 'package:noviindus_task/presentation/providers/patient_provider.dart';
-import 'package:noviindus_task/presentation/providers/payment_provider.dart';
-import 'package:noviindus_task/presentation/providers/register_provider.dart';
-import 'package:noviindus_task/presentation/providers/treatment_provider.dart';
-import 'package:noviindus_task/presentation/ui/home_screen/home_screen.dart';
-import 'package:noviindus_task/presentation/ui/login_screen/login_screen.dart';
-import 'package:noviindus_task/presentation/ui/splashscreen.dart';
+import 'package:noviindus_task/domain/repositories/patient_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'core/api_client.dart';
+import 'core/storage_helper.dart';
+
+import 'data/data_sources/auth_remote_data_sourse.dart';
+import 'data/data_sources/patient_remote_data_sourse.dart';
 
 import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/patient_repository_impl.dart';
+
 import 'domain/usecases/login_usecase.dart';
+import 'domain/usecases/patient_usecase.dart';
+import 'domain/usecases/save_patient_use_case.dart';
+
+import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/patient_provider.dart';
+import 'presentation/providers/register_provider.dart';
+import 'presentation/providers/treatment_provider.dart';
+import 'presentation/providers/branch_provider.dart';
+import 'presentation/providers/payment_provider.dart';
+
+import 'presentation/ui/home_screen/home_screen.dart';
+import 'presentation/ui/login_screen/login_screen.dart';
+import 'presentation/ui/splashscreen.dart';
+import 'core/size_config.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  //dependenct injection
   final apiClient = ApiClient();
   final storageHelper = StorageHelper();
+
   final authRemote = AuthRemoteDataSourceImpl(apiClient);
   final authRepo = AuthRepositoryImpl(authRemote, storageHelper);
   final loginUsecase = LoginUsecase(authRepo);
 
   final patientRemote = PatientRemoteDataSourceImpl(apiClient);
-  final patientRepo = PatientRepositoryImpl(patientRemote);
+
+  final PatientRepository patientRepo = PatientRepositoryImpl(patientRemote);
+
   final getPatientsUsecase = GetPatientsUsecase(patientRepo);
+  final savePatientUsecase = SavePatientUsecase(patientRepo);
 
   runApp(
     MultiProvider(
@@ -44,12 +53,18 @@ void main() {
             authRepository: authRepo,
           ),
         ),
+
         ChangeNotifierProvider(
-          create: (_) => PatientProvider(getPatients: getPatientsUsecase),
+          create: (_) => PatientProvider(
+            getPatients: getPatientsUsecase,
+            savePatient: savePatientUsecase,
+          ),
         ),
+
+        ChangeNotifierProvider(create: (_) => RegisterProvider(apiClient)),
+
         ChangeNotifierProvider(create: (_) => TreatmentProvider(apiClient)),
         ChangeNotifierProvider(create: (_) => BranchProvider(apiClient)),
-        ChangeNotifierProvider(create: (_) => RegisterProvider(apiClient)),
         ChangeNotifierProvider(create: (_) => PaymentOptionProvider()),
       ],
       child: const MyApp(),
@@ -59,6 +74,7 @@ void main() {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -69,7 +85,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _authProvider = context.read<AuthProvider>();
       _authProvider.tryAutoLogin();
@@ -80,7 +95,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'test-task',
+      title: 'Noviindus Task',
       theme: ThemeData(primarySwatch: Colors.teal),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
@@ -88,7 +103,7 @@ class _MyAppState extends State<MyApp> {
           switch (auth.status) {
             case AuthStatus.loading:
             case AuthStatus.unknown:
-              return SplashScreen();
+              return const Scaffold(body: SplashScreen());
             case AuthStatus.authenticated:
               return const HomeScreen();
             case AuthStatus.unauthenticated:

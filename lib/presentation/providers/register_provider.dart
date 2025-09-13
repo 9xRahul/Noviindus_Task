@@ -16,12 +16,14 @@ class RegisterProvider extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
+      print("Reached provider");
       final res = await api.postForm('PatientUpdate', fields);
       if (res.statusCode == 200) {
         status = SubmitStatus.success;
         notifyListeners();
         return true;
       } else {
+        print(res.body);
         error = 'Server responded ${res.statusCode}: ${res.body}';
         status = SubmitStatus.failure;
         notifyListeners();

@@ -1,21 +1,16 @@
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:noviindus_task/core/pdf/pdf_helper.dart';
-
 import 'package:noviindus_task/core/utils/date_convert.dart';
 import 'package:noviindus_task/data/models/treatment_counts.dart';
 import 'package:noviindus_task/domain/entities/branch.dart';
-
-
-
+import 'package:noviindus_task/presentation/providers/register_provider.dart';
+import 'package:provider/provider.dart';
 
 Future<bool> handleRegisterSave({
   required BuildContext context,
   required GlobalKey<FormState> formKey,
-
-  
   required TextEditingController nameController,
   required TextEditingController executiveController,
   required TextEditingController paymentController,
@@ -26,15 +21,11 @@ Future<bool> handleRegisterSave({
   required TextEditingController discountController,
   required TextEditingController advanceController,
   required TextEditingController balanceController,
-
-  
   required Map<int, TreatmentCounts> selectedTreatments,
   required Branch? selectedBranch,
   required String? selectedLocation,
   required String treatmentHour,
   required String treatmentMin,
-
-  
   String? suggestedFileNamePrefix,
 }) async {
   final messenger = ScaffoldMessenger.of(context);
@@ -46,14 +37,12 @@ Future<bool> handleRegisterSave({
     );
     return false;
   }
-
   if (selectedTreatments.isEmpty) {
     messenger.showSnackBar(
       const SnackBar(content: Text('Please add at least one treatment')),
     );
     return false;
   }
-
   if (selectedLocation == null || selectedLocation.isEmpty) {
     messenger.showSnackBar(
       const SnackBar(content: Text('Please select a location')),
@@ -74,15 +63,6 @@ Future<bool> handleRegisterSave({
 
   final dateStr = formatDateTimeForApi(DateTime.now());
 
-  final totalText = totalController.text.trim();
-  final discountText = discountController.text.trim();
-  final advanceText = advanceController.text.trim();
-
-  final totalNum = double.tryParse(totalText) ?? 0.0;
-  final discNum = double.tryParse(discountText) ?? 0.0;
-  final advNum = double.tryParse(advanceText) ?? 0.0;
-  final balance = balanceController.text;
-
   
   final Map<String, String> fields = {
     'name': nameController.text.trim(),
@@ -91,11 +71,11 @@ Future<bool> handleRegisterSave({
     'phone': phoneController.text.trim(),
     'address': addressController.text.trim(),
     'total_amount': totalController.text.trim(),
-    'discount_amount': discountText,
-    'advance_amount': advanceText,
-    'balance_amount': balance,
+    'discount_amount': discountController.text.trim(),
+    'advance_amount': advanceController.text.trim(),
+    'balance_amount': balanceController.text.trim(),
     'date_nd_time': dateStr,
-    "bookedon": DateFormat('dd/MM/yyyy').format(DateTime.now()),
+    'bookedon': DateFormat('dd/MM/yyyy').format(DateTime.now()),
     'id': '',
     'male': maleIds.join(','),
     'female': femaleIds.join(','),
@@ -106,64 +86,46 @@ Future<bool> handleRegisterSave({
     'min': treatmentMin,
   };
 
-  
-  final List<Map<String, dynamic>> treatments = [];
-  selectedTreatments.forEach((id, counts) {
-    final treatmentObj = counts.treatment;
-    String tName = 'Treatment';
-    int price = 0;
-
+  try {
     
-    try {
-      final dyn = treatmentObj as dynamic;
-      
-      if (dyn.name != null) {
-        tName = dyn.name.toString();
-      } else if (dyn.title != null) {
-        tName = dyn.title.toString();
-      } else if (dyn.treatmentName != null) {
-        tName = dyn.treatmentName.toString();
-      }
-      
-      final pVal = (dyn.price ?? dyn.amount ?? dyn.fee ?? 0);
-      if (pVal is int) {
-        price = pVal;
-      } else if (pVal is double) {
-        price = pVal.toInt();
-      } else {
-        price = int.tryParse(pVal.toString()) ?? 0;
-      }
-    } catch (_) {
-      
-      tName = 'Treatment';
-      price = 0;
+    final regProv = context.read<RegisterProvider>();
+    final ok = await regProv.submit(fields);
+
+    print("Buttonhit");
+
+    if (!ok) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Registration failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
     }
 
-    final maleCount = counts.male;
-    final femaleCount = counts.female;
-    final rowTotal = price * (maleCount + femaleCount);
-    treatments.add({
-      'name': tName,
-      'price': price,
-      'male': maleCount,
-      'female': femaleCount,
-      'total': rowTotal,
+    
+    final List<Map<String, dynamic>> treatments = [];
+    selectedTreatments.forEach((id, counts) {
+      final tObj = counts.treatment;
+      String tName = 'Treatment';
+      int price = 0;
+      try {
+        final dyn = tObj as dynamic;
+        if (dyn.name != null) tName = dyn.name.toString();
+        final pVal = (dyn.price ?? 0);
+        price = pVal is int ? pVal : int.tryParse(pVal.toString()) ?? 0;
+      } catch (_) {}
+      final rowTotal = price * (counts.male + counts.female);
+      treatments.add({
+        'name': tName,
+        'price': price,
+        'male': counts.male,
+        'female': counts.female,
+        'total': rowTotal,
+      });
     });
-  });
 
-  
-  if (treatments.isEmpty) {
-    treatments.add({
-      'name': 'Panchakarma',
-      'price': 230,
-      'male': 4,
-      'female': 4,
-      'total': 230 * 8,
-    });
-  }
-
-  
-  try {
+    
     messenger.hideCurrentSnackBar();
     final savedPath = await PdfHelper.generateAndPreviewPdf(
       context: context,
@@ -186,7 +148,7 @@ Future<bool> handleRegisterSave({
 
     messenger.showSnackBar(
       const SnackBar(
-        content: Text('Invoice generated'),
+        content: Text('Patient saved & Invoice generated'),
         backgroundColor: Colors.green,
       ),
     );

@@ -85,12 +85,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             SizedBox(height: SizeConfig.screenHeight / 40),
 
-                            // Form fields
+                            
                             Form(
                               key: _formKey,
                               child: Column(
                                 children: [
-                                  // Email - rounded box
+                                  
                                   buildInputField(
                                     controller: _emailCtrl,
                                     hint: 'Enter your email',
@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             SizedBox(height: SizeConfig.screenHeight / 5),
 
-                            // Terms text
+                            
                             bottomText(),
 
                             const SizedBox(height: 30),

@@ -10,7 +10,7 @@ class UserModel {
     String token = '';
 
     print(json);
-    //assumption values since api is giving error
+    
     if (json.containsKey('token'))
       token = json['token'].toString();
     else if (json.containsKey('access_token'))

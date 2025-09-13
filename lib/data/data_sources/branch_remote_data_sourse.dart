@@ -1,4 +1,4 @@
-// lib/data/datasources/branch_remote_data_source.dart
+
 import 'dart:convert';
 import 'package:noviindus_task/core/api_client.dart';
 
@@ -12,7 +12,7 @@ class BranchRemoteDataSourceImpl implements BranchRemoteDataSource {
 
   @override
   Future<List<Map<String, dynamic>>> fetchBranches() async {
-    final res = await client.get('BranchList'); // adjust endpoint if needed
+    final res = await client.get('BranchList'); 
     if (res.statusCode != 200) {
       throw Exception('Failed to fetch branches: ${res.statusCode}');
     }
